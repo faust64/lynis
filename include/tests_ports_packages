@@ -920,7 +920,7 @@
         LogText "Action: updating repository with apt-get"
         /usr/bin/apt-get -q=2 update
         LogText "Result: apt-get finished"
-        LogText "Test: Checking if /usr/lib/update-notifier/apt-check exists"
+        LogText "Test: Checking if /usr/lib/update-notifier/apt-check or /opt/patch_manager/patch_checker.sh exist"
         if [ -x /usr/lib/update-notifier/apt-check ]; then
           PACKAGE_AUDIT_TOOL="apt-check"
           LogText "Result: found /usr/lib/update-notifier/apt-check"
@@ -943,8 +943,23 @@
                   AddHP 0 25
               fi
           fi
+        elif [ -x /opt/patch_manager/patch_checker.sh ]; then
+          PACKAGE_AUDIT_TOOL="patchmanager"
+          LogText "Result: found /opt/patch_manager/patch_checker.sh"
+          LogText "Test: checking if any of the updates contain security updates"
+          # patch_checker is a script shiped by PatchDashboard
+          FIND=`/opt/patch_manager/patch_checker.sh report 2>&1 | awk -F: 'END{print NR}'`
+          if [ "${FIND}" = "0" ]; then
+              LogText "Result: no vulnerable packages found via patchdashboard"
+              SCAN_PERFORMED=1
           else
-            LogText "Result: apt-check (update-notifier-common) not found"
+              VULNERABLE_PACKAGES_FOUND=1
+              SCAN_PERFORMED=1
+              LogText "Result: found ${FIND} updates via patchdashboard"
+              AddHP 0 25
+          fi
+        else
+          LogText "Result: apt-check (update-notifier-common) & patchdashboard not found"
         fi
 
         # Trying also with apt-get directly (does not always work, as updates are distributed on both -security and -updates)
