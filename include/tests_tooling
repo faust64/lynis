@@ -114,6 +114,14 @@
             Display --indent 4 --text "Found: Puppet (master)" --result "${STATUS_FOUND}" --color GREEN
         fi
 
+        # Ansible
+        if [ ! "${ANSIBLEBINARY}" = "" ]; then
+            LogText "Result: Ansible is installed (${ANSIBLEBINARY})"
+            AUTOMATION_TOOL_FOUND=1
+            Report "automation_tool_running[]=ansible"
+            Display --indent 4 --text "Found: Ansible" --result "${STATUS_FOUND}" --color GREEN
+        fi
+
         # SaltStack
         if [ ! "${SALTMINIONBINARY}" = "" ]; then
             LogText "Result: SaltStack (salt-minion) is installed (${SALTMINIONBINARY})"
